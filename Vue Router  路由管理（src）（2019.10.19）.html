@@ -1,0 +1,800 @@
+<!DOCTYPE html><html><head><title>Vue Router  路由管理（src）（2019.10.19）</title><meta charset='utf-8'><link href='https://cdn.maxiang.io/res-min/themes/marxico.css' rel='stylesheet'><style>
+.note-content  {font-family: 'Helvetica Neue', Arial, 'Hiragino Sans GB', STHeiti, 'Microsoft YaHei', 'WenQuanYi Micro Hei', SimSun, Song, sans-serif;}
+
+</style></head><body><div id='preview-contents' class='note-content'>
+                        
+                    
+
+<hr>
+
+<hr>
+
+<hr>
+
+<div><div class="toc"><div class="toc">
+<ul>
+<li><ul>
+<li><a href="#vue-router-路由管理src20191019">Vue Router  路由管理（src）（2019.10.19）</a><ul>
+<li><a href="#spa-single-page-application-单页面应用">SPA ：single  page  application 单页面应用</a><ul>
+<li><a href="#amd-cmd">AMD / CMD</a></li>
+<li><a href="#hash">HASH</a></li>
+<li><a href="#history">History</a></li>
+</ul>
+</li>
+<li><a href="#mpamulti-page-application-多页面应用">MPA：multi  page  application  多页面应用</a></li>
+<li><a href="#vue-router前端路由">Vue-Router（前端路由）</a></li>
+<li><a href="#vue-router的基础概括">Vue-Router的基础概括</a></li>
+<li><a href="#一级路由-和-二级的构建-和-路由的跳转">一级路由 和 二级的构建 和 路由的跳转</a><ul>
+<li><a href="#二级路由实现跳转">二级路由实现跳转</a></li>
+<li><a href="#实现路由切换-thisrouter">实现路由切换（ this.$router）</a></li>
+</ul>
+</li>
+<li><a href="#router-link-细节点">router-link 细节点</a><ul>
+<li><a href="#基于地址path跳转传参基于问号参数">基于地址PATH跳转，传参基于问号参数</a></li>
+<li><a href="#命名路由给每一个路由设置一个名字后期可以基于名字实现跳转">命名路由（给每一个路由设置一个名字，后期可以基于名字实现跳转）</a></li>
+<li><a href="#动态路由">动态路由</a></li>
+<li><a href="#query-和-params-的区别">query 和 params 的区别</a></li>
+</ul>
+</li>
+<li><a href="#src文件夹工程化项目结构目录">src文件夹（工程化项目结构目录）</a></li>
+<li><a href="#路由中的组件渲染问题">路由中的组件渲染问题</a></li>
+<li><a href="#与路由有关的生命周期函数导航守卫路由权限校验">与路由有关的生命周期函数（导航守卫：路由权限校验）</a><ul>
+<li><a href="#全局守卫写在路由表末尾-beforeeach-beforeenter-beforereslove">全局守卫（写在路由表末尾）（ beforeEach  beforeEnter  beforeReslove）</a></li>
+<li><a href="#路由独享守卫beforeenter">路由独享守卫（beforeEnter）</a></li>
+<li><a href="#组件独有守卫">组件独有守卫</a></li>
+</ul>
+</li>
+<li><a href="#完整的导航解析流程">完整的导航解析流程</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+<h2 id="vue-router-路由管理src20191019">Vue Router  路由管理（src）（2019.10.19）</h2>
+
+
+
+<h3 id="spa-single-page-application-单页面应用">SPA ：single  page  application 单页面应用</h3>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs dockerfile"><div class="hljs-line">iframe
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">AMD / <span class="hljs-keyword">CMD</span><span class="bash"> + 打包工具</span>
+</div><div class="hljs-line"><span class="bash"></span>
+</div><div class="hljs-line">专业的路由管理模块 vue-router / react-router-dom
+</div></code></pre>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs awk"><div class="hljs-line">单页面应用模式SPA
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">应用过程：一个外壳页面和多个页面片段构成
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">跳转方式：一个页面删除或隐藏，加载另一个页面片段并显示，片段间的模拟跳转，没有开壳
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">跳转后公共资源是否重新加载：  否
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">URL模式：http:<span class="hljs-regexp">//</span>xxx<span class="hljs-regexp">/snel.html#page1  和  http:/</span><span class="hljs-regexp">/xxx/</span>snell.html<span class="hljs-comment">#page2</span>
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">用户体验：页面片段间切换快，用户体验好，包括移动设备
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">能否实现转场动画：容易实现（手机APP动效）
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">页面间传递数据：页面传递数据容易（Vuex 或 Vue 中的父子组件通讯 props 对象）
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">搜索引擎优化：需要单独方案（SSR）  
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">特别适用的范围：对体验要求高，特别是移动应用
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">开发难度：较高，需要专门的框架来降低这种模式的开发难度
+</div></code></pre>
+
+
+
+<h4 id="amd-cmd">AMD / CMD</h4>
+
+<blockquote>
+  <p><code>AMD</code>需要在模块最开始就把当前模块依赖的内容导入进来，然后再开发</p>
+  
+  <p><code>CMD</code>比较灵活，在开发过程中需要用到哪些模块，再单独导入即可</p>
+</blockquote>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs ada"><div class="hljs-line">AMD : <span class="hljs-type">require.js</span>
+</div><div class="hljs-line">CMD : <span class="hljs-type">sea.js</span>
+</div></code></pre>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs dockerfile"><div class="hljs-line">基于AMD / <span class="hljs-keyword">CMD</span><span class="bash">思想实现模块之间的依赖和调用</span>
+</div><div class="hljs-line"><span class="bash"></span>
+</div><div class="hljs-line">部署上线的时候在基于部署工具（grunt / glup / fis...）最后按照模块打包到同一个页面中  =&gt; 后期控制的是模块的显示隐藏
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">问题：把所有模块都放到一个页面中，模块之间的切换处理起来也不是特别方便，最主要的是第一次加载的时候，隐藏的模块有需要渲染和解析的，导致第一次加载速度过慢的问题
+</div></code></pre>
+
+
+
+<h4 id="hash">HASH</h4>
+
+<blockquote>
+  <p>VUE/VUE-ROUTER：在监听到HASH值变化后，<code>根据HASH值去路由表中找到对应的规则</code>，然后交给VUE渲染对应的组件（当前者之间还会有一些其它的处理）</p>
+</blockquote>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs xml"><div class="hljs-line"><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+</div><div class="hljs-line">    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"box1"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"box"</span>&gt;</span>A<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</div><div class="hljs-line">    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"box2"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"box"</span>&gt;</span>B<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</div><div class="hljs-line">    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"submit1"</span>&gt;</span>展示A<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+</div><div class="hljs-line">    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"submit2"</span>&gt;</span>展示B<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+</div><div class="hljs-line">    <span class="hljs-comment">&lt;!-- IMPORT JS --&gt;</span>
+</div><div class="hljs-line">    <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript"></span>
+</div><div class="hljs-line"><span class="javascript">        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">render</span>(<span class="hljs-params"></span>) </span>{</span>
+</div><div class="hljs-line"><span class="javascript">            <span class="hljs-comment">//=&gt;VUE/VUE-ROUTER：在监听到HASH值变化后，根据HASH值去路由表中找到对应的规则，然后交给VUE渲染对应的组件（当前者之间还会有一些其它的处理）</span></span>
+</div><div class="hljs-line"><span class="javascript">            <span class="hljs-keyword">let</span> hash = location.hash;</span>
+</div><div class="hljs-line"><span class="javascript">            <span class="hljs-keyword">if</span> (hash === <span class="hljs-string">'#B'</span>) {</span>
+</div><div class="hljs-line"><span class="javascript">                box1.style.display = <span class="hljs-string">'none'</span>;</span>
+</div><div class="hljs-line"><span class="javascript">                box2.style.display = <span class="hljs-string">'block'</span>;</span>
+</div><div class="hljs-line"><span class="javascript">                <span class="hljs-keyword">return</span>;</span>
+</div><div class="hljs-line"><span class="javascript">            }</span>
+</div><div class="hljs-line"><span class="javascript">            box1.style.display = <span class="hljs-string">'block'</span>;</span>
+</div><div class="hljs-line"><span class="javascript">            box2.style.display = <span class="hljs-string">'none'</span>;</span>
+</div><div class="hljs-line"><span class="javascript">        }</span>
+</div><div class="hljs-line"><span class="javascript">        render();</span>
+</div><div class="hljs-line"><span class="javascript">        <span class="hljs-built_in">window</span>.addEventListener(<span class="hljs-string">'hashchange'</span>, render);</span>
+</div><div class="hljs-line"><span class="javascript"></span>
+</div><div class="hljs-line"><span class="javascript">        <span class="hljs-comment">//=&gt;VUE-ROUTER中还做了一件事情，构建一个历史记录的容器，每一次切换完，都把当前最新的地址存储到容器中 =&gt;方便实现后退、前进，还可基于此实现路由的切换...</span></span>
+</div><div class="hljs-line"><span class="javascript">        submit1.onclick = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{</span>
+</div><div class="hljs-line"><span class="javascript">            <span class="hljs-keyword">let</span> index = location.href.length;</span>
+</div><div class="hljs-line"><span class="javascript">            <span class="hljs-keyword">if</span> (location.hash) {</span>
+</div><div class="hljs-line"><span class="javascript">                index = location.href.indexOf(<span class="hljs-string">'#'</span>);</span>
+</div><div class="hljs-line"><span class="javascript">            }</span>
+</div><div class="hljs-line"><span class="javascript">            location.href = location.href.substring(<span class="hljs-number">0</span>, index) + <span class="hljs-string">'#A'</span>;</span>
+</div><div class="hljs-line"><span class="javascript">        };</span>
+</div><div class="hljs-line"><span class="javascript">        submit2.onclick = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{</span>
+</div><div class="hljs-line"><span class="javascript">            <span class="hljs-keyword">let</span> index = location.href.length;</span>
+</div><div class="hljs-line"><span class="javascript">            <span class="hljs-keyword">if</span> (location.hash) {</span>
+</div><div class="hljs-line"><span class="javascript">                index = location.href.indexOf(<span class="hljs-string">'#'</span>);</span>
+</div><div class="hljs-line"><span class="javascript">            }</span>
+</div><div class="hljs-line"><span class="javascript">            location.href = location.href.substring(<span class="hljs-number">0</span>, index) + <span class="hljs-string">'#B'</span>;</span>
+</div><div class="hljs-line"><span class="javascript">        };</span>
+</div><div class="hljs-line"><span class="javascript">    </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</div><div class="hljs-line"><span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+</div></code></pre>
+
+
+
+<h4 id="history">History</h4>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs xml"><div class="hljs-line"><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span>
+</div><div class="hljs-line">    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"box1"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"box"</span>&gt;</span>A<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</div><div class="hljs-line">    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"box2"</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"box"</span>&gt;</span>B<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+</div><div class="hljs-line">    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"submit1"</span>&gt;</span>展示A<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+</div><div class="hljs-line">    <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"submit2"</span>&gt;</span>展示B<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+</div><div class="hljs-line">    <span class="hljs-comment">&lt;!-- IMPORT JS --&gt;</span>
+</div><div class="hljs-line">    <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript"></span>
+</div><div class="hljs-line"><span class="javascript">        <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">render</span>(<span class="hljs-params"></span>) </span>{</span>
+</div><div class="hljs-line"><span class="javascript">            <span class="hljs-keyword">let</span> pathname = location.pathname;</span>
+</div><div class="hljs-line"><span class="javascript">            <span class="hljs-keyword">if</span> (pathname.includes(<span class="hljs-string">'/B'</span>)) {</span>
+</div><div class="hljs-line"><span class="javascript">                box1.style.display = <span class="hljs-string">'none'</span>;</span>
+</div><div class="hljs-line"><span class="javascript">                box2.style.display = <span class="hljs-string">'block'</span>;</span>
+</div><div class="hljs-line"><span class="javascript">                <span class="hljs-keyword">return</span>;</span>
+</div><div class="hljs-line"><span class="javascript">            }</span>
+</div><div class="hljs-line"><span class="javascript">            box1.style.display = <span class="hljs-string">'block'</span>;</span>
+</div><div class="hljs-line"><span class="javascript">            box2.style.display = <span class="hljs-string">'none'</span>;</span>
+</div><div class="hljs-line"><span class="javascript">        }</span>
+</div><div class="hljs-line"><span class="javascript">        render();</span>
+</div><div class="hljs-line"><span class="javascript">        <span class="hljs-comment">// window.onpopstate = render;   当状态发生改变的时候</span></span>
+</div><div class="hljs-line"><span class="javascript"></span>
+</div><div class="hljs-line"><span class="javascript">        submit1.onclick = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{</span>
+</div><div class="hljs-line"><span class="javascript">            <span class="hljs-comment">//=&gt;向浏览器历史记录中新增一条数据（地址栏中的地址会改变），但是页面不会刷新，但是如果我们给定的地址是不存在的，当我们页面手动刷新的时候，当前地址会报404错误，所以BROWSER ROUTER需要服务器的支持（一般给予的支持：即使请求地址不存在，也是把首页的内容返回给客户端，而不是404）！</span></span>
+</div><div class="hljs-line"><span class="javascript">            history.pushState({</span>
+</div><div class="hljs-line"><span class="javascript">                <span class="hljs-attr">state</span>: <span class="hljs-number">1</span></span>
+</div><div class="hljs-line"><span class="javascript">            }, <span class="hljs-string">"珠峰培训1"</span>, location.origin + <span class="hljs-string">'/A'</span>);</span>
+</div><div class="hljs-line"><span class="javascript">            render();</span>
+</div><div class="hljs-line"><span class="javascript">        };</span>
+</div><div class="hljs-line"><span class="javascript">        submit2.onclick = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{</span>
+</div><div class="hljs-line"><span class="javascript">            history.pushState({</span>
+</div><div class="hljs-line"><span class="javascript">                <span class="hljs-attr">state</span>: <span class="hljs-number">2</span></span>
+</div><div class="hljs-line"><span class="javascript">            }, <span class="hljs-string">"珠峰培训2"</span>, location.origin + <span class="hljs-string">'/B'</span>);</span>
+</div><div class="hljs-line"><span class="javascript">            render();</span>
+</div><div class="hljs-line"><span class="javascript">        };</span>
+</div><div class="hljs-line"><span class="javascript">    </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</div><div class="hljs-line"><span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span>
+</div></code></pre>
+
+
+
+<h3 id="mpamulti-page-application-多页面应用">MPA：multi  page  application  多页面应用</h3>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs livecodeserver"><div class="hljs-line">多页面应用模式MPA
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">应用过程：由多个完整页面构成
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">跳转方式：页面之间的跳转是从一个页面到另一个页面
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">跳转后公共资源是否重新加载：  是
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line"><span class="hljs-built_in">URL</span>模式：<span class="hljs-keyword">http</span>://xxx/page1.html  和  <span class="hljs-keyword">http</span>://xxx/page2.html
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">用户体验：页面间切换加载慢，不流畅，用户体验差，尤其在移动端
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">能否实现转场动画：否
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">页面间传递数据：依赖<span class="hljs-built_in">URL</span>、cookie 或者 localstorage，实现麻烦
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">搜索引擎优化：可以直接做
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">特别适用的范围：需要对搜索引擎友好的网站
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">开发难度：较低，框架选择容易
+</div></code></pre>
+
+
+
+<h3 id="vue-router前端路由">Vue-Router（前端路由）</h3>
+
+<blockquote>
+  <p><code>作用</code>：能构建<code>SPA单页面应用开发</code></p>
+</blockquote>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs ruby"><div class="hljs-line">更完善的组件化管理框架    Vue  /  React
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">更完善的组件之间渲染和切换的机制（前端路由）
+</div><div class="hljs-line">   Vue-Router  构建了一个历史记录的容器，每一次切换完，都把当前的最新地址存储到容器中，  =&gt;  方便实现后退、前进，还可以基于此实现路由的切换
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">   React-Router-Dom 
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">更方便的组件之间的通信方式
+</div><div class="hljs-line">   =&gt; Vuex
+</div><div class="hljs-line">   =&gt; redux / react-redux / dva / redux-saga / mobx
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">更好的部署打包工具
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">   webpack
+</div></code></pre>
+
+
+
+<h3 id="vue-router的基础概括">Vue-Router的基础概括</h3>
+
+<blockquote>
+  <p><code>Vue / Vue-Router：</code>在监听到HASH值变化后，根据HASH值去路由表中找到对应的规则，然后交给Vue渲染对应的组件（当前者之间还会有一些其它的处理 </p>
+  
+  <p><code>Vue-Router</code> 中还做了一些事情，构建一个<code>历史记录的容器</code>，每一期切换完，都把当前<code>最新的地址存储到容器中</code> =&gt; 方便实现后退、前进、还可以基于此实现路由的切换。</p>
+</blockquote>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs elixir"><div class="hljs-line">下载
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line"><span class="hljs-variable">$ </span>npm i vue-router
+</div><div class="hljs-line"><span class="hljs-keyword">or</span>
+</div><div class="hljs-line"><span class="hljs-variable">$ </span>yarn add vue-router
+</div></code></pre>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs javascript"><div class="hljs-line">component:<span class="hljs-function"><span class="hljs-params">()</span>=&gt;</span>{
+</div><div class="hljs-line">        <span class="hljs-comment">//    component: 可以是一个组件</span>
+</div><div class="hljs-line">        <span class="hljs-comment">//    components: {} 可以是一个对象（多命名视图）</span>
+</div><div class="hljs-line">        <span class="hljs-comment">//    component: 函数 只有路由匹配成功才引入当前模块，也可以在函数中做点事情，例如权限校验 </span>
+</div><div class="hljs-line">        <span class="hljs-keyword">return</span> <span class="hljs-keyword">import</span>(<span class="hljs-string">'./pages/Home'</span>);
+</div><div class="hljs-line">         }
+</div></code></pre>
+
+
+
+<h3 id="一级路由-和-二级的构建-和-路由的跳转">一级路由 和 二级的构建 和 路由的跳转</h3>
+
+<blockquote>
+  <p>1、 创建一个<code>路由配置表</code>：<code>设定什么样的地址</code>（或者HASH）<code>渲染哪一个组件的规则</code></p>
+</blockquote>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs javascript"><div class="hljs-line"><span class="hljs-comment">//配置路由表：设定什么样的地址（或者HASH）渲染哪一个组件的规则</span>
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line"><span class="hljs-keyword">import</span> Vue <span class="hljs-keyword">from</span> <span class="hljs-string">'vue'</span>;
+</div><div class="hljs-line"><span class="hljs-keyword">import</span> VueRouter <span class="hljs-keyword">from</span> <span class="hljs-string">'vue-router'</span>;
+</div><div class="hljs-line"><span class="hljs-keyword">import</span> Home <span class="hljs-keyword">from</span> <span class="hljs-string">'./pages/Home'</span>;
+</div><div class="hljs-line"><span class="hljs-keyword">import</span> Custom <span class="hljs-keyword">from</span> <span class="hljs-string">'./pages/Custem'</span>;
+</div><div class="hljs-line"><span class="hljs-keyword">import</span> System <span class="hljs-keyword">from</span> <span class="hljs-string">'./pages/System'</span>;
+</div><div class="hljs-line"><span class="hljs-keyword">import</span> CustomList <span class="hljs-keyword">from</span> <span class="hljs-string">'./pages/custom/CustomList'</span>;
+</div><div class="hljs-line"><span class="hljs-keyword">import</span> CustomHandle <span class="hljs-keyword">from</span> <span class="hljs-string">'./pages/custom/CustomHandle'</span>;
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">Vue.use(VueRouter);
+</div><div class="hljs-line"><span class="hljs-comment">//创建路由配置表</span>
+</div><div class="hljs-line"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-keyword">new</span> VueRouter({
+</div><div class="hljs-line">    <span class="hljs-comment">//设置路由模式 hash / history</span>
+</div><div class="hljs-line">    mode: <span class="hljs-string">"hash"</span>,
+</div><div class="hljs-line">    <span class="hljs-comment">//配置一级路由  //每一个对象都是一个规则  Home：首页 Custom：客户管理（我的客户、全部客户可用一个组件（CustomList），新增客户用一个组件（CustomHandle）</span>
+</div><div class="hljs-line">    <span class="hljs-comment">//系统设置：System</span>
+</div><div class="hljs-line">    <span class="hljs-comment">//渲染同一个组件，但展示的内容不一样，我们进行区分，可进行传参</span>
+</div><div class="hljs-line">    routes: [{
+</div><div class="hljs-line">        <span class="hljs-comment">//请求的是一个/（http://127.0.0.1:8080/#/），我们让其重定向到/home</span>
+</div><div class="hljs-line">        path: <span class="hljs-string">'/'</span>,
+</div><div class="hljs-line">        <span class="hljs-attr">redirect</span>: <span class="hljs-string">'/home'</span>   <span class="hljs-comment">// redirect 重定向 英[ˌriːdəˈrekt , ˈriːdərekt]</span>
+</div><div class="hljs-line">        <span class="hljs-comment">//  component: Home  真实项目中很少会让两个地址渲染一个组件</span>
+</div><div class="hljs-line">    },
+</div><div class="hljs-line">    {
+</div><div class="hljs-line">        <span class="hljs-comment">// hash路径</span>
+</div><div class="hljs-line">        path: <span class="hljs-string">'/home'</span>,   <span class="hljs-comment">// http://127.0.0.1:8080/#/</span>
+</div><div class="hljs-line">        <span class="hljs-comment">// 渲染的组件</span>
+</div><div class="hljs-line">        component: Home
+</div><div class="hljs-line">    }, {
+</div><div class="hljs-line">        <span class="hljs-attr">path</span>: <span class="hljs-string">'/custom'</span>,
+</div><div class="hljs-line">        <span class="hljs-attr">component</span>: Custom,
+</div><div class="hljs-line">        <span class="hljs-comment">//配置某一个一级路由下面的二级路由</span>
+</div><div class="hljs-line">        children: [{
+</div><div class="hljs-line">            <span class="hljs-attr">path</span>: <span class="hljs-string">'/custom/list'</span>,
+</div><div class="hljs-line">            <span class="hljs-attr">component</span>: CustomList
+</div><div class="hljs-line">        }, {
+</div><div class="hljs-line">            <span class="hljs-attr">path</span>: <span class="hljs-string">'handle'</span>,  <span class="hljs-comment">//可用简写，但是不能写斜杠了，否则认为是根目录下访问</span>
+</div><div class="hljs-line">            component: CustomHandle
+</div><div class="hljs-line">        }]
+</div><div class="hljs-line">    }, {
+</div><div class="hljs-line">        <span class="hljs-attr">path</span>: <span class="hljs-string">'/system'</span>,
+</div><div class="hljs-line">        <span class="hljs-attr">component</span>: System
+</div><div class="hljs-line">    }，{
+</div><div class="hljs-line">        <span class="hljs-comment">//每一次地址改变，都会到路由表中自上而下逐一匹配</span>
+</div><div class="hljs-line">        <span class="hljs-comment">//匹配到一级成功，再匹配二级...，在某级中没有则跳出来继续向下匹配</span>
+</div><div class="hljs-line">        <span class="hljs-comment">//直到找到一个完全匹配的，则渲染对应的组件（不再向下匹配了）</span>
+</div><div class="hljs-line">        <span class="hljs-comment">//如果上面都匹配不成功</span>
+</div><div class="hljs-line">        path:<span class="hljs-string">'*'</span>,
+</div><div class="hljs-line">        <span class="hljs-attr">redirect</span>:<span class="hljs-string">'/'</span>
+</div><div class="hljs-line">        <span class="hljs-comment">// component:Error</span>
+</div><div class="hljs-line">    }]
+</div><div class="hljs-line">})
+</div><div class="hljs-line"><wbr>
+</div></code></pre>
+
+<blockquote>
+  <p>2、<code>放置路由容器：&lt;router-view&gt;&lt;/router-view&gt;</code></p>
+  
+  <p>3、<code>实现路由的切换和跳转</code>  <code>&lt;router-link to='/home'&gt;首页&lt;/router-link&gt;</code></p>
+</blockquote>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs elixir"><div class="hljs-line">main.js
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">Vue.config.productionTip = <span class="hljs-keyword">false</span>;
+</div><div class="hljs-line">new Vue({
+</div><div class="hljs-line">  router, <span class="hljs-regexp">//</span>=&gt;this.<span class="hljs-variable">$router</span> this.<span class="hljs-variable">$route</span>===<span class="hljs-variable">$router</span>.currentRoute
+</div><div class="hljs-line">  store, <span class="hljs-regexp">//</span>=&gt;this.<span class="hljs-variable">$store</span>
+</div><div class="hljs-line">  <span class="hljs-symbol">render:</span> h =&gt; h(App)
+</div><div class="hljs-line">}).<span class="hljs-variable">$mount</span>(<span class="hljs-string">'#app'</span>);
+</div></code></pre>
+
+
+
+<p><img longdesc="./ROUTER.png" alt="Alt text" title="" type="image/png" src="data:image/png;base64,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" class=""></p>
+
+
+
+<h4 id="二级路由实现跳转">二级路由实现跳转</h4>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs dust"><div class="hljs-line"><span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">template</span>&gt;</span></span>
+</div><div class="hljs-line"><span class="xml">  <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"container"</span>&gt;</span></span>
+</div><div class="hljs-line"><span class="xml">    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"leftBox"</span>&gt;</span></span>
+</div><div class="hljs-line"><span class="xml">      <span class="hljs-tag">&lt;<span class="hljs-name">el-menu</span></span></span>
+</div><div class="hljs-line"><span class="xml">        <span class="hljs-attr">default-active</span>=<span class="hljs-string">"1"</span></span>
+</div><div class="hljs-line"><span class="xml">        <span class="hljs-attr">class</span>=<span class="hljs-string">"el-menu-vertical-demo"</span></span>
+</div><div class="hljs-line"><span class="xml">        <span class="hljs-attr">background-color</span>=<span class="hljs-string">"#545c64"</span></span>
+</div><div class="hljs-line"><span class="xml">        <span class="hljs-attr">text-color</span>=<span class="hljs-string">"#fff"</span></span>
+</div><div class="hljs-line"><span class="xml">        <span class="hljs-attr">active-text-color</span>=<span class="hljs-string">"#ffd04b"</span></span>
+</div><div class="hljs-line"><span class="xml">      &gt;</span>
+</div><div class="hljs-line"><span class="xml">        <span class="hljs-tag">&lt;<span class="hljs-name">el-menu-item</span> <span class="hljs-attr">index</span>=<span class="hljs-string">"1"</span>&gt;</span></span>
+</div><div class="hljs-line"><span class="xml">          <span class="hljs-tag">&lt;<span class="hljs-name">router-link</span> <span class="hljs-attr">slot</span>=<span class="hljs-string">"title"</span> <span class="hljs-attr">to</span>=<span class="hljs-string">"/custom/list/my"</span>&gt;</span>我的客户<span class="hljs-tag">&lt;/<span class="hljs-name">router-link</span>&gt;</span></span>
+</div><div class="hljs-line"><span class="xml">        <span class="hljs-tag">&lt;/<span class="hljs-name">el-menu-item</span>&gt;</span></span>
+</div><div class="hljs-line"><span class="xml">        <span class="hljs-tag">&lt;<span class="hljs-name">el-menu-item</span> <span class="hljs-attr">index</span>=<span class="hljs-string">"2"</span>&gt;</span></span>
+</div><div class="hljs-line"><span class="xml">          <span class="hljs-tag">&lt;<span class="hljs-name">router-link</span> <span class="hljs-attr">slot</span>=<span class="hljs-string">"title"</span> <span class="hljs-attr">:to</span>=<span class="hljs-string">"</span></span></span><span class="hljs-template-variable">{name:'customList',params:{lx:'all'}</span><span class="xml"><span class="hljs-tag"><span class="hljs-string">}"</span>&gt;</span>全部客户<span class="hljs-tag">&lt;/<span class="hljs-name">router-link</span>&gt;</span></span>
+</div><div class="hljs-line"><span class="xml">        <span class="hljs-tag">&lt;/<span class="hljs-name">el-menu-item</span>&gt;</span></span>
+</div><div class="hljs-line"><span class="xml">        <span class="hljs-tag">&lt;<span class="hljs-name">el-menu-item</span> <span class="hljs-attr">index</span>=<span class="hljs-string">"3"</span>&gt;</span></span>
+</div><div class="hljs-line"><span class="xml">          <span class="hljs-tag">&lt;<span class="hljs-name">router-link</span> <span class="hljs-attr">slot</span>=<span class="hljs-string">"title"</span> <span class="hljs-attr">to</span>=<span class="hljs-string">"/custom/handle"</span>&gt;</span>新增客户<span class="hljs-tag">&lt;/<span class="hljs-name">router-link</span>&gt;</span></span>
+</div><div class="hljs-line"><span class="xml">        <span class="hljs-tag">&lt;/<span class="hljs-name">el-menu-item</span>&gt;</span></span>
+</div><div class="hljs-line"><span class="xml">      <span class="hljs-tag">&lt;/<span class="hljs-name">el-menu</span>&gt;</span></span>
+</div><div class="hljs-line"><span class="xml">    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+</div><div class="hljs-line"><span class="xml">    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"rightBox"</span>&gt;</span></span>
+</div><div class="hljs-line"><span class="xml">      <span class="hljs-tag">&lt;<span class="hljs-name">router-view</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">router-view</span>&gt;</span></span>
+</div><div class="hljs-line"><span class="xml">    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+</div><div class="hljs-line"><span class="xml">  <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+</div><div class="hljs-line"><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">template</span>&gt;</span></span>
+</div></code></pre>
+
+
+
+<h4 id="实现路由切换-thisrouter">实现路由切换（ this.$router）</h4>
+
+<blockquote>
+  <p><code>实现路由的切换和跳转</code>  <code>&lt;router-link to='/home'&gt;首页&lt;/router-link&gt;</code></p>
+  
+  <p><code>编程式导航</code></p>
+</blockquote>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs coq"><div class="hljs-line"> computed: {
+</div><div class="hljs-line">    queryLx() {
+</div><div class="hljs-line">      //=&gt;获取路由切换时传递的参数信息
+</div><div class="hljs-line">      /*
+</div><div class="hljs-line">       * this.$router
+</div><div class="hljs-line">       *    go(n)：回退或者前进N步
+</div><div class="hljs-line">       *    back() =&gt; go(<span class="hljs-number">-1</span>)
+</div><div class="hljs-line">       *    forward() =&gt; go(<span class="hljs-number">1</span>)
+</div><div class="hljs-line">       *    push()：跳转到指定的路由，实现路由切换
+</div><div class="hljs-line">       * =&gt;编程式导航
+</div><div class="hljs-line">       */
+</div><div class="hljs-line">      // console.log(this.$router.currentRoute);
+</div><div class="hljs-line">    }
+</div><div class="hljs-line">  }
+</div></code></pre>
+
+
+
+<h3 id="router-link-细节点">router-link 细节点</h3>
+
+
+
+<h4 id="基于地址path跳转传参基于问号参数">基于地址PATH跳转，传参基于问号参数</h4>
+
+<blockquote>
+  <p><code>path方式跳转，不能基于params传递参数</code>，只能基于query问号传参</p>
+</blockquote>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs asciidoc"><div class="hljs-line"><span class="hljs-section">&lt;router-link to="/custom/list"&gt;&lt;/router-link&gt;  //字符串</span>
+</div><div class="hljs-line"><span class="hljs-section">==</span>
+</div><div class="hljs-line">&lt;router-link :to="{path:<span class="hljs-emphasis">'/custom/list}"&gt;&lt;/router-link&gt;  //对象</span>
+</div><div class="hljs-line"><span class="hljs-emphasis"></span>
+</div><div class="hljs-line"><span class="hljs-emphasis"></span><span class="hljs-section">&lt;router-link to='/custom/list?lx=my'&gt;&lt;/router-link&gt;</span>
+</div><div class="hljs-line"><span class="hljs-section">==</span>
+</div><div class="hljs-line">&lt;router-link :to="{path:/custom/list,query:{lx:<span class="hljs-emphasis">'my'</span>}}"&gt;
+</div></code></pre>
+
+
+
+<h4 id="命名路由给每一个路由设置一个名字后期可以基于名字实现跳转">命名路由（给每一个路由设置一个名字，后期可以基于名字实现跳转）</h4>
+
+<blockquote>
+  <p>在路由配置表中给<code>每一个路由规则设置name</code></p>
+  
+  <p><code>命名路由跳转只能是对象 : to="{ }"</code></p>
+</blockquote>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs less"><div class="hljs-line"><span class="hljs-selector-tag">Vue</span><span class="hljs-selector-class">.use</span>(VueRouter);
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line"><span class="hljs-selector-tag">export</span> <span class="hljs-selector-tag">default</span> <span class="hljs-selector-tag">new</span> <span class="hljs-selector-tag">VueRouter</span>({
+</div><div class="hljs-line">  <span class="hljs-attribute">model</span>:<span class="hljs-string">'hash'</span>,
+</div><div class="hljs-line">  <span class="hljs-attribute">routes</span>:[{
+</div><div class="hljs-line">      <span class="hljs-attribute">path</span>:<span class="hljs-string">'/'</span>,
+</div><div class="hljs-line">      <span class="hljs-attribute">name</span>:<span class="hljs-string">'home'</span>,   <span class="hljs-comment">//命名路由</span>
+</div><div class="hljs-line">      <span class="hljs-attribute">redirect</span>:<span class="hljs-string">'/home'</span>
+</div><div class="hljs-line">  },{
+</div><div class="hljs-line">      <span class="hljs-attribute">path</span>:<span class="hljs-string">'/custom'</span>,
+</div><div class="hljs-line">      <span class="hljs-attribute">name</span>:<span class="hljs-string">'custom'</span>,
+</div><div class="hljs-line">      <span class="hljs-attribute">component</span>:Custom,
+</div><div class="hljs-line">      <span class="hljs-attribute">children</span>:[{
+</div><div class="hljs-line">          <span class="hljs-attribute">path</span>:<span class="hljs-string">'/custom/list'</span>,
+</div><div class="hljs-line">          <span class="hljs-attribute">name</span>:<span class="hljs-string">'customList'</span>,
+</div><div class="hljs-line">          <span class="hljs-attribute">component</span>:CustomList
+</div><div class="hljs-line">      },{
+</div><div class="hljs-line">          <span class="hljs-attribute">path</span>:<span class="hljs-string">'handle'</span>,
+</div><div class="hljs-line">          <span class="hljs-attribute">name</span>:<span class="hljs-string">'customHandle'</span>,
+</div><div class="hljs-line">          <span class="hljs-attribute">component</span>:CustomHandle
+</div><div class="hljs-line">      }]
+</div><div class="hljs-line">  },{
+</div><div class="hljs-line">      <span class="hljs-attribute">path</span>:<span class="hljs-string">'/system'</span>,
+</div><div class="hljs-line">      <span class="hljs-attribute">name</span>:<span class="hljs-string">'system'</span>,
+</div><div class="hljs-line">      <span class="hljs-attribute">component</span>:System
+</div><div class="hljs-line">  }]
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">})
+</div></code></pre>
+
+
+
+<h4 id="动态路由">动态路由</h4>
+
+<blockquote>
+  <p><code>把传递的参数作为路由地址的一部分</code></p>
+</blockquote>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs sqf"><div class="hljs-line">路由表
+</div><div class="hljs-line">{
+</div><div class="hljs-line">          path:<span class="hljs-string">'/custom/list/:lx'</span>,  <span class="hljs-comment">//动态路由（把传递的参数作为路由地址的一部分）</span>
+</div><div class="hljs-line">          <span class="hljs-built_in">name</span>:<span class="hljs-string">'customList'</span>,
+</div><div class="hljs-line">          component:CustomList
+</div><div class="hljs-line">      }
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">跳转
+</div><div class="hljs-line">&lt;router-link <span class="hljs-keyword">to</span>=<span class="hljs-string">"/custom/list/my"</span>&gt;&lt;/router-link&gt;
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">获取（当前地址下刷新页面，<span class="hljs-built_in">params</span>中的信息也不会消失）
+</div><div class="hljs-line">this.$router.currentRoute.<span class="hljs-built_in">params</span> = {lx:<span class="hljs-string">'my'</span>}
+</div></code></pre>
+
+
+
+<h4 id="query-和-params-的区别">query 和 params 的区别</h4>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs stylus"><div class="hljs-line">query问号传递的信息会在地址栏中体现出来
+</div><div class="hljs-line">    + 比较丑
+</div><div class="hljs-line">    + 基于 router-link 或者 this.<span class="hljs-variable">$router</span><span class="hljs-selector-class">.push</span> 跳转的时候，传递的参数可以在渲染的组件中获取到
+</div><div class="hljs-line">    + 在当前地址下刷新，依然可以基于 this.<span class="hljs-variable">$router</span><span class="hljs-selector-class">.currentRoute</span><span class="hljs-selector-class">.query</span>获取到（地址中有）
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">params不会在地址栏中显示
+</div><div class="hljs-line">    + 相对美观
+</div><div class="hljs-line">    + 基于 router-link 或者 this.<span class="hljs-variable">$router</span><span class="hljs-selector-class">.push</span> 跳转的时候，传递的参数可以在渲染的组件中也可以获取到
+</div><div class="hljs-line">    + 在当前地址下刷新浏览器，params中的信息就清空了
+</div></code></pre>
+
+
+
+<h3 id="src文件夹工程化项目结构目录">src文件夹（工程化项目结构目录）</h3>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs stylus"><div class="hljs-line">router<span class="hljs-selector-class">.js</span>        路由管控
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">main<span class="hljs-selector-class">.js</span>          入口（编译）
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">App<span class="hljs-selector-class">.vue</span>          单页面应用的入口或者容器
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">store文件夹       管理vuex
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">pages            各模块的页面组件   routes / containers
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">components       组件：公用的才是组件
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">assets           静态资源文件     css/ 图片 / 工具类的JS
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">api              所有和服务器的数据交互  
+</div></code></pre>
+
+
+
+<h3 id="路由中的组件渲染问题">路由中的组件渲染问题</h3>
+
+<blockquote>
+  <p><code>每一次路由的跳转和切换</code>，都是<code>把之前渲染的组件销毁（destoryed）</code>，重新渲染新的组件（控制台输出顺序：（<code>BEFORE-CREATE =&gt; DATA</code> =&gt; CREATE =&gt; BEFORE-MOUNT =&gt; MOUNTED）</p>
+</blockquote>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs less"><div class="hljs-line"><span class="hljs-selector-tag">export</span> <span class="hljs-selector-tag">default</span> {
+</div><div class="hljs-line">  <span class="hljs-selector-tag">beforeCreate</span>() {
+</div><div class="hljs-line">    <span class="hljs-selector-tag">console</span><span class="hljs-selector-class">.log</span>(<span class="hljs-string">"BEFORE-CREATE"</span>);
+</div><div class="hljs-line">  },
+</div><div class="hljs-line">  <span class="hljs-selector-tag">created</span>() {
+</div><div class="hljs-line">    <span class="hljs-selector-tag">console</span><span class="hljs-selector-class">.log</span>(<span class="hljs-string">"CREATE"</span>);
+</div><div class="hljs-line">  },
+</div><div class="hljs-line">  <span class="hljs-selector-tag">beforeMount</span>() {
+</div><div class="hljs-line">    <span class="hljs-selector-tag">console</span><span class="hljs-selector-class">.log</span>(<span class="hljs-string">"BEFORE-MOUNT"</span>);
+</div><div class="hljs-line">  },
+</div><div class="hljs-line">  <span class="hljs-selector-tag">mounted</span>() {
+</div><div class="hljs-line">    <span class="hljs-selector-tag">console</span><span class="hljs-selector-class">.log</span>(<span class="hljs-string">"MOUNTED"</span>);
+</div><div class="hljs-line">  },
+</div><div class="hljs-line">  <span class="hljs-selector-tag">beforeDestroy</span>() {
+</div><div class="hljs-line">    <span class="hljs-selector-tag">console</span><span class="hljs-selector-class">.log</span>(<span class="hljs-string">"BEFORE-DESTROY"</span>);
+</div><div class="hljs-line">  },
+</div><div class="hljs-line">  <span class="hljs-selector-tag">destroyed</span>() {
+</div><div class="hljs-line">    <span class="hljs-selector-tag">console</span><span class="hljs-selector-class">.log</span>(<span class="hljs-string">"DESTROYED"</span>);
+</div><div class="hljs-line">  },
+</div><div class="hljs-line">  <span class="hljs-selector-tag">data</span>() {
+</div><div class="hljs-line">    <span class="hljs-selector-tag">console</span><span class="hljs-selector-class">.log</span>(<span class="hljs-string">"DATA"</span>);
+</div><div class="hljs-line">    <span class="hljs-selector-tag">return</span> {};
+</div><div class="hljs-line">  },
+</div></code></pre>
+
+
+
+<h3 id="与路由有关的生命周期函数导航守卫路由权限校验">与路由有关的生命周期函数（导航守卫：路由权限校验）</h3>
+
+<blockquote>
+  <p><code>全局beforeEach  =&gt;  路由独有beforeEnter  =&gt;  组件独有beforeRouterEnter  =&gt;  全局beforeReslove（当前被激活的组件开始渲染）  =&gt;  全局afterEach  =&gt; beforeCreate  =&gt;  data  =&gt; ...</code> （vue的一个生命周期）</p>
+  
+  <p><code>“导航”表示路由正在发生改变</code></p>
+  
+  <p><code>组件独有beforeRouterLeave  =&gt;  全局beforeEach  =&gt;  全局beforeReslove  =&gt;  全局afterEach  =&gt;  before-destory  =&gt;  destoryed</code>（vue的一个生命周期）</p>
+</blockquote>
+
+
+
+<h4 id="全局守卫写在路由表末尾-beforeeach-beforeenter-beforereslove">全局守卫（写在路由表末尾）（ beforeEach  beforeEnter  beforeReslove）</h4>
+
+<blockquote>
+  <p><code>不管路由匹配哪一个地址，渲染了哪一个组件都会触发</code></p>
+</blockquote>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs awk"><div class="hljs-line"><span class="hljs-regexp">//</span>全局前置守卫(渲染组件之前)
+</div><div class="hljs-line">router.beforEach((to,from,<span class="hljs-keyword">next</span>)=&gt;{
+</div><div class="hljs-line">  <span class="hljs-regexp">//</span>to: 即将要进入的路由
+</div><div class="hljs-line">  <span class="hljs-regexp">//</span>from：即将要离开的路由
+</div><div class="hljs-line">  <span class="hljs-regexp">//</span><span class="hljs-keyword">next</span>（）：进行管道中的下一个钩子
+</div><div class="hljs-line">  <span class="hljs-regexp">//</span><span class="hljs-keyword">next</span>(false)：中断当前导航
+</div><div class="hljs-line">  <span class="hljs-regexp">//</span><span class="hljs-keyword">next</span>(<span class="hljs-string">'/xxx'</span>)：当前导航中断，进入到下一个导航（和<span class="hljs-variable">$router</span>.push一样）  
+</div><div class="hljs-line">})
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line"><span class="hljs-regexp">//</span>router.beforeResolve  全局解析守卫（导航被确认之前，同时在所有的组件内守卫和异步路由组件被解析之后，解析守卫就被调用）
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line"><span class="hljs-regexp">//</span>全局后置钩子（没有<span class="hljs-keyword">next</span>）（渲染组件之后）
+</div><div class="hljs-line">router.afterEach((to,from)=&gt;{
+</div><div class="hljs-line">    <span class="hljs-regexp">//</span>...
+</div><div class="hljs-line">});
+</div></code></pre>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs javascript"><div class="hljs-line">Vue.use(VueRouter);
+</div><div class="hljs-line"><span class="hljs-keyword">const</span> router = <span class="hljs-keyword">new</span> VueRouter({
+</div><div class="hljs-line">    <span class="hljs-attr">mode</span>: <span class="hljs-string">"hash"</span>,
+</div><div class="hljs-line">    <span class="hljs-attr">routes</span>: [{
+</div><div class="hljs-line">        <span class="hljs-attr">path</span>: <span class="hljs-string">'/'</span>,
+</div><div class="hljs-line">        <span class="hljs-attr">redirect</span>: <span class="hljs-string">'/home'</span>
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">    },
+</div><div class="hljs-line">    {
+</div><div class="hljs-line">        <span class="hljs-attr">path</span>: <span class="hljs-string">'/home'</span>,
+</div><div class="hljs-line">        <span class="hljs-attr">component</span>: Home,
+</div><div class="hljs-line">    }, {
+</div><div class="hljs-line">        <span class="hljs-attr">path</span>: <span class="hljs-string">'/custom'</span>,
+</div><div class="hljs-line">        <span class="hljs-attr">component</span>: Custom,
+</div><div class="hljs-line">        <span class="hljs-attr">children</span>: [{
+</div><div class="hljs-line">            <span class="hljs-attr">path</span>: <span class="hljs-string">'/custom/list'</span>,
+</div><div class="hljs-line">            <span class="hljs-attr">component</span>: CustomList
+</div><div class="hljs-line">        }, {
+</div><div class="hljs-line">            <span class="hljs-attr">path</span>: <span class="hljs-string">'handle'</span>,
+</div><div class="hljs-line">            <span class="hljs-attr">component</span>: CustomHandle
+</div><div class="hljs-line">        }]
+</div><div class="hljs-line">    }, {
+</div><div class="hljs-line">        <span class="hljs-attr">path</span>: <span class="hljs-string">'/system'</span>,
+</div><div class="hljs-line">        <span class="hljs-attr">component</span>: System
+</div><div class="hljs-line">    }, {
+</div><div class="hljs-line">        <span class="hljs-attr">path</span>: <span class="hljs-string">'*'</span>,
+</div><div class="hljs-line">        <span class="hljs-attr">redirect</span>: <span class="hljs-string">'/'</span>
+</div><div class="hljs-line">        <span class="hljs-comment">// component:Error</span>
+</div><div class="hljs-line">    }]
+</div><div class="hljs-line">});
+</div><div class="hljs-line"><span class="hljs-comment">// 全局守卫（不管路由匹配哪一个地址，渲染了哪一个组件都会触发）</span>
+</div><div class="hljs-line">router.beforeEach(<span class="hljs-function">(<span class="hljs-params">to, <span class="hljs-keyword">from</span>, next</span>) =&gt;</span> {
+</div><div class="hljs-line">    <span class="hljs-comment">//to: 将要跳转到的路由对象（query / params...)</span>
+</div><div class="hljs-line">    <span class="hljs-comment">//from：从哪个路由来，存储的也是这个路由对象</span>
+</div><div class="hljs-line">    <span class="hljs-comment">// console.log("====全局BEFORE EACH",to,from)</span>
+</div><div class="hljs-line">    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"====全局BEFORE EACH"</span>);
+</div><div class="hljs-line">    <span class="hljs-comment">//进入下一个钩子函数（执行下一项任务）：不写 next 当前操作到此结束</span>
+</div><div class="hljs-line">    next();
+</div><div class="hljs-line">});
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line">router.afterEach(<span class="hljs-function">(<span class="hljs-params">to, <span class="hljs-keyword">from</span></span>) =&gt;</span> {
+</div><div class="hljs-line">    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"====全局AFTER EACH"</span>);
+</div><div class="hljs-line">})
+</div><div class="hljs-line"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> router
+</div></code></pre>
+
+
+
+<h4 id="路由独享守卫beforeenter">路由独享守卫（beforeEnter）</h4>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs javascript"><div class="hljs-line"><span class="hljs-keyword">const</span> router = <span class="hljs-keyword">new</span> VueRouter({
+</div><div class="hljs-line">   <span class="hljs-attr">routes</span>: [
+</div><div class="hljs-line">   {
+</div><div class="hljs-line">    <span class="hljs-attr">path</span>: <span class="hljs-string">'/xxx'</span>,
+</div><div class="hljs-line">    <span class="hljs-attr">component</span>: xxx,
+</div><div class="hljs-line">    <span class="hljs-attr">beforeEnter</span>: <span class="hljs-function">(<span class="hljs-params">to,<span class="hljs-keyword">from</span>,next</span>)=&gt;</span>{
+</div><div class="hljs-line">         <span class="hljs-comment">//...</span>
+</div><div class="hljs-line">   }
+</div><div class="hljs-line">  }
+</div><div class="hljs-line">   ]
+</div><div class="hljs-line">})
+</div></code></pre>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs autoit"><div class="hljs-line">{
+</div><div class="hljs-line">        path: <span class="hljs-string">'/home'</span>,
+</div><div class="hljs-line">        component: Home,
+</div><div class="hljs-line">        //路由独有守卫
+</div><div class="hljs-line">        beforeEnter(<span class="hljs-keyword">to</span>, from, <span class="hljs-keyword">next</span>) {
+</div><div class="hljs-line">            console.<span class="hljs-built_in">log</span>(<span class="hljs-string">"====路由BEFORE ENTER"</span>)<span class="hljs-comment">;</span>
+</div><div class="hljs-line">            <span class="hljs-keyword">next</span>()<span class="hljs-comment">;</span>
+</div><div class="hljs-line">   }
+</div></code></pre>
+
+
+
+<h4 id="组件独有守卫">组件独有守卫</h4>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs javascript"><div class="hljs-line">xxx.vue
+</div><div class="hljs-line"><wbr>
+</div><div class="hljs-line"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> {
+</div><div class="hljs-line">  beforeCreate() {
+</div><div class="hljs-line">    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"BEFORE-CREATE"</span>);
+</div><div class="hljs-line">  },
+</div><div class="hljs-line">  created() {
+</div><div class="hljs-line">    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"CREATE"</span>);
+</div><div class="hljs-line">  },
+</div><div class="hljs-line">  beforeMount() {
+</div><div class="hljs-line">    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"BEFORE-MOUNT"</span>);
+</div><div class="hljs-line">  },
+</div><div class="hljs-line">  mounted() {
+</div><div class="hljs-line">    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"MOUNTED"</span>);
+</div><div class="hljs-line">  },
+</div><div class="hljs-line">  beforeDestroy() {
+</div><div class="hljs-line">    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"BEFORE-DESTROY"</span>);
+</div><div class="hljs-line">  },
+</div><div class="hljs-line">  destroyed() {
+</div><div class="hljs-line">    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"DESTROYED"</span>);
+</div><div class="hljs-line">  },
+</div><div class="hljs-line">  data() {
+</div><div class="hljs-line">    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"DATA"</span>);
+</div><div class="hljs-line">    <span class="hljs-keyword">return</span> {};
+</div><div class="hljs-line">  },
+</div><div class="hljs-line">  <span class="hljs-comment">/* 组件独有的守卫 */</span>
+</div><div class="hljs-line">  beforeRouteEnter(to, <span class="hljs-keyword">from</span>, next) {
+</div><div class="hljs-line">    <span class="hljs-comment">//=&gt;也获取不到THIS</span>
+</div><div class="hljs-line">    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"=====组件独有BEFORE ROUTE ENTER"</span>);
+</div><div class="hljs-line">    next();  <span class="hljs-comment">//next执行才往下走</span>
+</div><div class="hljs-line">  },
+</div><div class="hljs-line">  beforeRouteUpdate(to, <span class="hljs-keyword">from</span>, next) {
+</div><div class="hljs-line">    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"=====组件独有BEFORE ROUTE UPDATE"</span>);
+</div><div class="hljs-line">    next();
+</div><div class="hljs-line">  },
+</div><div class="hljs-line">  beforeRouteLeave(to, <span class="hljs-keyword">from</span>, next) {
+</div><div class="hljs-line">    <span class="hljs-comment">//=&gt;获取到this</span>
+</div><div class="hljs-line">    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"=====组件独有BEFORE ROUTE LEAVE"</span>);
+</div><div class="hljs-line">    next();
+</div><div class="hljs-line">  }
+</div><div class="hljs-line">};
+</div><div class="hljs-line"><span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></span>
+</div><div class="hljs-line"><wbr>
+</div></code></pre>
+
+
+
+<h3 id="完整的导航解析流程">完整的导航解析流程</h3>
+
+
+
+<pre class="prettyprint hljs-dark"><code class="hljs lsl"><div class="hljs-line"><span class="hljs-number">1</span>、导航被触发 （浏览器地址改变）
+</div><div class="hljs-line"><span class="hljs-number">2</span>、在失活的组件里调用离开守卫      （beforeRouterLeave）
+</div><div class="hljs-line"><span class="hljs-number">3</span>、调用全局的 beforeEach  守卫 
+</div><div class="hljs-line"><span class="hljs-number">4</span>、在重用的组件里调用 beforeRouterUpdate 守卫（<span class="hljs-number">2.2</span>+） （从当前组件又跳到该组件）
+</div><div class="hljs-line"><span class="hljs-number">5</span>、在路由配置里调用 beforeEnter    （到新组件）
+</div><div class="hljs-line"><span class="hljs-number">6</span>、解析异步路由组件
+</div><div class="hljs-line"><span class="hljs-number">7</span>、在被激活的组件里调用 beforeRouteEnter
+</div><div class="hljs-line"><span class="hljs-number">8</span>、调用全局的 beforeReslove 守卫（<span class="hljs-number">2.5</span>+）
+</div><div class="hljs-line"><span class="hljs-number">9</span>、导航被确认
+</div><div class="hljs-line"><span class="hljs-number">10</span>、调用全局的 afterEach 钩子
+</div><div class="hljs-line"><span class="hljs-number">11</span>、触发 DOM 更新
+</div><div class="hljs-line"><span class="hljs-number">12</span>、用创建好的实例调用 beforeRouterEnter 守卫中传给 next 的回调函数
+</div></code></pre></div></body></html>
